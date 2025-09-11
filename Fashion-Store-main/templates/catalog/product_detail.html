@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+  <link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+<div class="container product-detail">
+  <nav style="font-size:12px; margin-bottom:15px;">
+    Home / Clothing / {{ product.category }} / <strong>{{ product.name }}</strong>
+  </nav>
+
+  <div class="row">
+    <!-- Product Image -->
+      <div class="col-md-6">
+      {% if product.image %}
+      <div class="product-image-zoom" id="productZoom">
+        <img src="{{ product.image.url }}" id="productImage" alt="{{ product.name }}">
+      </div>
+      {% endif %}
+    </div>
+
+
+
+    <!-- Product Info -->
+    <div class="col-md-6">
+      <h3 class="product-name">{{ product.name }}</h3>
+      <div class="product-desc">{{ product.description }}</div>
+      <div class="product-category">Category: {{ product.category.name }}</div>
+
+      <div class="price">
+        ₹{{ product.base_price }}
+        <!-- <span class="mrp">₹{{ product.mrp }}</span>
+        <span class="discount">{{ product.discount }} OFF</span> -->
+      </div>
+
+      <!-- Ratings -->
+      <div style="margin-bottom:10px;">
+        <span class="rating">{{ product.rating }}★</span> 
+        <span style="font-size:12px; color:#7d7d7d;">| {{ product.num_ratings }} Ratings</span>
+      </div>
+
+      <!-- Size Selection -->
+      <form method="post" action="/cart/add/{{ product.id }}/">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" style="font-weight:600;">SELECT SIZE</label><br>
+          {% for v in unique_sizes %}
+          <label class="size-option {% if forloop.first %}active{% endif %}">
+            <input type="radio" name="size" value="{{ v.size }}" {% if forloop.first %}checked{% endif %} hidden>
+            {{ v.size }}
+          </label>
+          {% endfor %}
+        </div>
+         <div class="mb-3">
+          <label class="form-label" style="font-weight:600;">SELECT COLOR</label><br>
+          {% for v in unique_colors %}
+          <label class="color-option {% if forloop.first %}active{% endif %}">
+            <input type="radio" name="color" value="{{ v.color }}" {% if forloop.first %}checked{% endif %} hidden>
+         
+           {% if v.image %}
+    <img src="{{ v.image.url }}" class="card-img-top" style="height:90px;width: 60px; object-fit:cover;" alt="{{ v.name }}">
+    {% endif %}
+      <br> {{ v.color }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Quantity -->
+        <div class="mb-3">
+          <label class="form-label" style="font-weight:600;">Quantity</label>
+          <input type="number" name="qty" class="form-control" value="1" min="1" style="width:100px;">
+        </div>
+
+        <!-- Buttons -->
+        <button type="submit" class="btn-add">ADD TO BAG</button>
+        <!-- <button type="button" class="btn-wishlist">WISHLIST</button> -->
+      </form>
+      <hr>
+<h5>Outfit Suggestions</h5>
+<div class="d-flex overflow-auto py-2">
+  {% for s in suggestions|slice:":5" %}
+  <a href="{{ s.get_absolute_url }}" class="text-decoration-none text-dark" style="font-size:14px;">
+  <div class="card me-3" style="min-width:140px; max-width:140px;">
+    {% if s.image %}
+    <img src="{{ s.image.url }}" class="card-img-top" style="height:140px; object-fit:cover;" alt="{{ s.name }}">
+    {% else %}
+    <div class="bg-light d-flex align-items-center justify-content-center" style="height:140px;">No Image</div>
+    {% endif %}
+    <div class="card-body p-2 text-center">
+      {{ s.name|truncatechars:20 }}
+      <p class="fw-bold mb-0" style="font-size:14px;">₹{{ s.base_price }}</p>
+    </div>
+  </div>
+  </a>
+  {% empty %}
+  <p>No suggestions available.</p>
+  {% endfor %}
+</div>
+    </div>
+    
+  </div>
+
+  <!-- Reviews Section -->
+ <div class="mt-4">
+  <h5>Reviews</h5>
+  {% for r in reviews %}
+    <div class="review-box p-3 mb-4 border rounded shadow-sm">
+      
+      <!-- User + Rating -->
+      <div class="review-user fw-bold mb-1">
+        {{ r.user.email }} <span class="text-warning">★ {{ r.rating }}/5</span>
+      </div>
+      <div class="review-comment mb-2">{{ r.comment }}</div>
+
+      <!-- Review Images Myntra Style -->
+      {% if r.reviews_image.all %}
+        <div class="review-images d-flex gap-2 overflow-auto">
+          {% for img in r.reviews_image.all %}
+            <div class="review-img-thumb">
+              <img src="{{ img.image.url }}" alt="Review Image">
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  {% empty %}
+    <p>No reviews yet.</p>
+  {% endfor %}
+</div>
+</div>
+
+
+
+<script>
+(function(){
+  const wrap = document.getElementById('productZoom');
+  const img  = document.getElementById('productImage');
+  if(!wrap || !img) return;
+
+  const zoomLevel = 2.2;
+
+  function setOriginFromEvent(ev){
+    const rect = wrap.getBoundingClientRect();
+    const clientX = ('clientX' in ev) ? ev.clientX : ev.touches[0].clientX;
+    const clientY = ('clientY' in ev) ? ev.clientY : ev.touches[0].clientY;
+
+    const xPct = ((clientX - rect.left) / rect.width) * 100;
+    const yPct = ((clientY - rect.top)  / rect.height) * 100;
+
+    img.style.transformOrigin = `${xPct}% ${yPct}%`;
+  }
+
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+
+  if(!isCoarse){
+    wrap.addEventListener('mouseenter', () => {
+      wrap.classList.add('zoomed');
+      img.style.transform = `scale(${zoomLevel})`;
+    });
+
+    wrap.addEventListener('mousemove', (e) => {
+      setOriginFromEvent(e);
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      wrap.classList.remove('zoomed');
+      img.style.transform = '';
+    });
+  }else{
+    // Touch: tap to toggle, drag to pan focal point
+    let active = false;
+    wrap.addEventListener('click', (e) => {
+      active = !active;
+      if(active){
+        wrap.classList.add('zoomed');
+        img.style.transform = `scale(${zoomLevel})`;
+        setOriginFromEvent(e);
+      }else{
+        wrap.classList.remove('zoomed');
+        img.style.transform = '';
+      }
+    });
+    wrap.addEventListener('touchmove', (e) => {
+      if(!active) return;
+      setOriginFromEvent(e);
+      e.preventDefault();
+    }, {passive:false});
+  }
+})();
+  // Toggle active class for size selection
+  document.querySelectorAll('.size-option').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.size-option').forEach(e=>e.classList.remove('active'));
+      el.classList.add('active');
+      el.querySelector('input').checked = true;
+    });
+  });
+
+   document.querySelectorAll('.color-option').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.color-option').forEach(e=>e.classList.remove('active'));
+      el.classList.add('active');
+      el.querySelector('input').checked = true;
+    });
+  });
+</script>
+{% endblock %}

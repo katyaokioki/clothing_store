@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Orders</h3>
+<table class="table">
+  <thead><tr><th>#</th><th>Date</th><th>Status</th><th>Total</th><th>Tracking</th></tr></thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="/orders/{{ o.id }}/">#{{ o.id }}</a></td>
+      <td>{{ o.created_at }}</td>
+      <td>{{ o.status }}</td>
+      <td>₹{{ o.total_amount }}</td>
+      <td><a href="/orders/{{ o.id }}/" class="btn-link fs-6 text-uppercase item-anchor text-decoration-none">{{ o.tracking_number }}</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No orders yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

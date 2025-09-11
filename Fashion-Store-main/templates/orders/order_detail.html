@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  /* success text */
+.order-success {
+  position: absolute;
+  top: 35%;
+  left: 30%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1babeb; /* green success */
+  opacity: 0;
+  animation: showText 1s ease forwards;
+  animation-delay: 1.5s; /* appear while truck is in motion */
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+}
+
+/* fade-in + slight upward motion */
+@keyframes showText {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+ /* full-screen overlay */
+.checkout-animation {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* road covers full screen width */
+.road {
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  width: 100vw;        /* full screen width */
+  height: 140px;       /* big highway */
+  background: #2e2e2e;
+  box-shadow: inset 0 8px 16px rgba(0,0,0,0.3);
+}
+
+/* dashed lane inside road */
+.road .lane {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(
+    to right, #fff 0 100px, transparent 100px 160px
+  );
+  opacity: 0.9;
+}
+
+/* truck positioned on top of road */
+.truck {
+  position: absolute;
+  bottom: calc(45% + 40px);
+  left: -25%;
+  transform: scaleX(-1) scale(2);
+  font-size: clamp(140px, 20vw, 200px);
+  line-height: 1;
+  animation: drive 3.5s linear forwards;
+  z-index: 2;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.3));
+}
+
+/* products container */
+.products {
+  position: absolute;
+  bottom: calc(70% + 120px);
+  width: 100%;
+  display: flex;
+
+  gap: 14px;
+  z-index: 1;
+}
+
+/* product boxes initially hidden */
+.product-box {
+  width: 70px;
+  height: 70px;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;                  /* hidden at start */
+  transform: translateY(0);
+}
+
+.product-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* fall animation */
+@keyframes loadUnder {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(80px); opacity: 0; }
+}
+
+/* animations */
+@keyframes drive {
+  from { left: -25%; }
+  to { left: 110%; }
+}
+
+
+
+</style>
+<div id="checkout-animation" class="checkout-animation" aria-hidden="true">
+  <div class="stage">
+    <div class="order-success">Order has been {{ order.status }} successfully 🎉<br> <p class="text-center">{{ order.tracking_number }}</p></div>
+    <div class="road">
+      <span class="lane"></span>
+    </div>
+
+    <!-- BIG TRUCK (emoji flipped to face right) -->
+    <div class="truck" role="img" aria-label="Delivery truck">🚚
+      
+    </div>
+
+    <!-- PRODUCTS that slide up under the truck -->
+    <div class="products">
+      {% for it in order.items.all %}
+        <div class="product-box">
+          {% if it.variant.image %}
+            <img src="{{ it.variant.image.url }}" alt="{{ it.variant.product.name }}">
+          {% else %}
+            <span>📦</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="container my-4">
+
+  <!-- Order Header -->
+  <div class="card p-3 mb-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5>Order #{{ order.id }}</h5>
+      <span class="badge 
+        {% if order.status == 'Delivered' %}bg-success
+        {% elif order.status == 'Shipped' %}bg-primary
+        {% elif order.status == 'Processing' %}bg-warning text-dark
+        {% else %}bg-secondary{% endif %}">
+        {{ order.status }}
+      </span>
+    </div>
+    {% if order.tracking_number %}
+    <p class="mt-2 mb-0">Tracking Number: <strong>{{ order.tracking_number }}</strong></p>
+    {% endif %}
+    <p class="mb-0">Order Date: {{ order.created_at|date:"d M Y" }}</p>
+     <p class="mb-0">Delivery Address:{% if order.address %} {{ order.address}} {% else %} -{% endif %}</p>
+  </div>
+
+  <!-- Ordered Items -->
+  {% for it in order.items.all %}
+  <div class="card mb-3 shadow-sm">
+    <div class="row g-0 align-items-center">
+      <div class="col-md-3 text-center p-2">
+        {% if it.variant.product.image %}
+        <img src="{{ it.variant.image.url }}" class="img-fluid" style="max-height:120px;" alt="{{ it.variant.product.name }}">
+        {% else %}
+        <div class="bg-light d-flex align-items-center justify-content-center" style="height:120px;">No Image</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <div class="card-body">
+          <h6 class="card-title">{{ it.variant.product.name }}</h6>
+          <p class="text-muted mb-1">{{ it.variant.size }} / {{ it.variant.color }}</p>
+          <p class="fw-bold mb-1">₹{{ it.price }}</p>
+          <p>Quantity: {{ it.quantity }}</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <p class="fw-bold mb-0">Subtotal</p>
+        <p class="fw-bold">₹{{ it.price|floatformat:1|add:"0" }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Order Summary -->
+  <div class="card p-3 shadow-sm">
+    <h5 class="mb-3">Payment Summary</h5>
+    <hr>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Subtotal</span>
+      <span>₹{{ order.total_amount }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Discount</span>
+      {% if order.coupon %}
+      {% widthratio order.total_amount 100 order.coupon.discount_percent as discount %}
+      {% endif %}
+      <span>-₹{{ discount|add:"0" }}</span>
+    </div>
+    <div class="d-flex justify-content-between fw-bold">
+      <span>Total Paid</span>
+      <span>₹{{ order.total_amount }}</span>
+    </div>
+  </div>
+
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  const truckDuration = 3000; // ms, must match drive animation
+  const fallDelay = truckDuration / 2; // when truck is approx center
+
+  // Get product boxes
+  const products = document.querySelectorAll(".product-box");
+
+  // Trigger fall when truck reaches center
+  setTimeout(() => {
+    products.forEach((el, i) => {
+      el.style.animation = `loadUnder 1s ease forwards`;
+      el.style.animationDelay = `${i * 0.2}s`; // stagger each product
+      el.style.opacity = 1;
+    });
+  }, fallDelay);
+});
+document.addEventListener("DOMContentLoaded", function () {
+  // Stagger product animations so they don’t all move at once
+  const chips = document.querySelectorAll(".product-box");
+  chips.forEach((el, i) => {
+    el.style.animationDelay = `${i * 0.15}s`;
+  });
+
+  // Hide overlay, reveal page after truck completes
+  const showAfter = 3200; // must match drive animation duration
+  setTimeout(() => {
+    const overlay = document.getElementById("checkout-animation");
+    if (overlay) overlay.style.display = "none";
+
+    const main = document.querySelector(".order-page");
+    if (main){
+      main.style.display = "block";
+      main.style.animation = "fadeIn .35s ease-out";
+    }
+  }, showAfter);
+});
+</script>
+
+{% endblock %}

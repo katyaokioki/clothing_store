@@ -1,0 +1,124 @@
+ /* Container adjustments */
+  .product-detail { margin-top: 20px; }
+  .product-image { width: 100%; border-radius: 8px; }
+  .product-name { font-weight: 600; font-size: 24px; margin-bottom: 8px; }
+  .product-desc { font-size: 14px; color: #4f4f4f; margin-bottom: 10px; }
+  .product-category { font-size: 12px; color: #7d7d7d; margin-bottom: 10px; }
+  
+  /* Price */
+  .price { font-size: 20px; font-weight: 600; margin-bottom: 5px; }
+  .mrp { text-decoration: line-through; color: #7d7d7d; margin-left: 10px; }
+  .discount { color: #1babeb; font-weight: 600; margin-left: 10px; }
+
+  /* Size buttons */
+  .size-option { 
+    border: 1px solid #ddd; 
+    padding: 8px 15px; 
+    border-radius: 50%; 
+    display: inline-block; 
+    margin-right: 10px; 
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  .size-option.active, .size-option:hover { 
+    border: 2px solid #1babeb; 
+    color: #1babeb; 
+    font-weight: 600;
+  }
+
+  .color-option { 
+    border: 1px solid #ddd; 
+    padding: 8px 15px; 
+    border-radius: 10px; 
+    display: inline-block; 
+    margin-right: 10px; 
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  .color-option.active, .color-option:hover { 
+    border: 2px solid #1babeb; 
+    color: #1babeb; 
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  .btn-add { background-color: #1babeb; color: #fff; font-weight: 600; padding: 12px 25px; border: none; border-radius: 4px; transition: background 0.2s; }
+  .btn-add:hover { background-color: #1babeb; }
+  .btn-wishlist { border: 1px solid #ddd; color: #000; padding: 12px 25px; border-radius: 4px; margin-left: 10px; transition: all 0.2s; }
+  .btn-wishlist:hover { border-color: #1babeb; color: #1babeb; }
+
+  /* Reviews */
+  .review-box { border-top: 1px solid #ddd; padding: 10px 0; }
+  .review-user { font-weight: 600; font-size: 13px; }
+  .review-comment { font-size: 13px; color: #4f4f4f; margin: 2px 0; }
+
+  /* Ratings */
+  .rating { background-color: #ffdc00; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-right: 5px; }
+
+  .review-box {
+  background: #fff;
+}
+
+.review-images {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  scrollbar-width: thin;
+}
+
+.review-images::-webkit-scrollbar {
+  height: 6px;
+}
+.review-images::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.review-img-thumb img {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+.review-img-thumb img:hover {
+  transform: scale(1.05);
+}
+
+.product-image-zoom{
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.product-image-zoom img{
+  width: 100%;
+  height: auto;
+  display: block;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out; /* buttery smooth */
+  cursor: zoom-in;
+  will-change: transform, transform-origin;
+}
+
+/* zoomed state */
+.product-image-zoom.zoomed img{
+  transform: scale(2.2);  /* zoom level (2x–3x recommended) */
+  cursor: zoom-out;
+}
+
+/* touch devices: default pinch-zoom UX, inside-zoom off */
+@media (pointer: coarse){
+  .product-image-zoom img{ cursor: default; }
+  .product-image-zoom.zoomed img{ transform: none; }
+}
+

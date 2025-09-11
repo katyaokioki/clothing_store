@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+
+  <h3 class="mb-4">Your Cart</h3>
+
+  {% if items %}
+  <div class="row">
+    <!-- Cart Items -->
+    <div class="col-lg-8">
+      {% for item in items %}
+      <div class="card mb-3 shadow-sm">
+        <div class="row g-0 align-items-center">
+          <div class="col-md-3 text-center p-2">
+            {% if item.variant.image %}
+            <img src="{{ item.variant.image.url }}" class="img-fluid" style="max-height:120px;" alt="{{ item.variant.product.name }}">
+            {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height:120px;">No Image</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <div class="card-body">
+              <h6 class="card-title">{{ item.variant.product.name }}</h6>
+              <p class="text-muted mb-1">{{ item.variant.size }} / {{ item.variant.color }}</p>
+              <p class="fw-bold mb-1">₹{{ item.variant.price }}</p>
+              <form method="post" action="/cart/update/{{ item.id }}/" class="d-flex align-items-center">
+                {% csrf_token %}
+                <input type="number" name="qty" class="form-control me-2" value="{{ item.quantity }}" min="1" style="width:80px;">
+                <button class="btn btn-outline-secondary btn-sm">Update</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-3 text-center">
+            <p class="fw-bold mb-2">₹{{ item.subtotal }}</p>
+            <form method="post" action="/cart/remove/{{ item.id }}/">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger">Remove</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Price & Address Section -->
+    <div class="col-lg-4">
+      <div class="card p-3 shadow-sm">
+        <h5 class="mb-3">Billing Details</h5>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <span>Subtotal</span>
+          <span>₹{{ totals.subtotal }}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Discount</span>
+          <span>-₹{{ totals.discount }}</span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold">
+          <span>Total</span>
+          <span>₹{{ totals.total }}</span>
+        </div>
+
+        <!-- Coupon Form -->
+        <form method="post" action="/cart/apply-coupon/" class="mt-3">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" class="form-control" name="code" placeholder="Discount code">
+            <button class="btn btn-outline-dark">Apply</button>
+          </div>
+        </form>
+
+     <!-- Address Selection -->
+<div class="mt-4">
+  <h6 class="mb-2">Select Delivery Address</h6>
+  {% if addresses %}
+    <div class="list-group mb-3" style="max-height:200px; overflow-y:auto;">
+      {% for addr in addresses %}
+      <label class="list-group-item d-flex align-items-start">
+        <input type="radio" name="address_id" value="{{ addr.id }}" {% if forloop.first %}checked{% endif %} required>
+        <div class="ms-2">
+          <strong>{{ addr.address_line }}</strong><br>
+          {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}<br>
+          {{ addr.country }}
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+
+    <!-- Add New Address Button -->
+    <div class="text-end mb-3">
+      <a href="{% url 'add_address' %}" class="btn btn-outline-primary btn-sm">
+        + Add New Address
+      </a>
+     
+    </div>
+
+  {% else %}
+    <p class="text-muted">No address found. 
+      <a href="{% url 'add_address' %}" class="fw-bold">Add one</a>
+    </p>
+  {% endif %}
+</div>
+
+        <!-- Checkout -->
+        <form method="post" action="/orders/checkout/">
+          {% csrf_token %}
+          {% if addresses %}
+            <input type="hidden" name="address_id" id="selected_address">
+            <button type="submit" class="btn btn-primary w-100" style="background-color: #1babeb;">Proceed to Checkout</button>
+          {% else %}
+            <a href="{% url 'add_address' %}" class="btn btn-primary w-100" style="background-color: #1babeb;">Add Address to Continue</a>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center my-5">
+    <h5>Your cart is empty!</h5>
+    <a href="/" class="btn btn-outline-primary mt-3">Continue Shopping</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- JS to bind selected radio to hidden field -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const radios = document.querySelectorAll('input[name="address_id"]');
+  const hidden = document.getElementById("selected_address");
+
+  function updateHidden() {
+    const selected = document.querySelector('input[name="address_id"]:checked');
+    if (selected) hidden.value = selected.value;
+  }
+
+  radios.forEach(r => r.addEventListener("change", updateHidden));
+  updateHidden();
+});
+</script>
+{% endblock %}

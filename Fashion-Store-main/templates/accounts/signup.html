@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Signup</h3>
+<form id="signupForm" method="post" novalidate>{% csrf_token %}
+  <div class="mb-3">
+    <label>Name</label>
+    <input type="text" name="name" id="name" class="form-control" required>
+    <small id="nameError" class="text-danger"></small>
+  </div>
+  <div class="mb-3">
+    <label>Phone (optional)</label>
+    <input type="text" name="phone" id="phone" class="form-control" maxlength="10">
+    <small id="phoneError" class="text-danger"></small>
+  </div>
+  <div class="mb-3">
+    <label>Email</label>
+    <input type="email" name="email" id="email" class="form-control" required>
+    <small id="emailError" class="text-danger"></small>
+  </div>
+  <div class="mb-3">
+    <label>Password</label>
+    <input type="password" name="password" id="password" class="form-control" required>
+    <small id="passwordError" class="text-danger"></small>
+  </div>
+  <button class="btn btn-primary" type="submit">Create Account</button>
+</form>
+
+<script>
+function validateField(field) {
+    let value = field.value.trim();
+    let errorField = document.getElementById(field.id + "Error");
+
+    // Clear old error
+    errorField.innerText = "";
+
+    // Regex patterns
+    let phonePattern = /^[0-9]{10}$/;
+    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Switch by field
+    if (field.id === "name") {
+        if (value === "") errorField.innerText = "Name cannot be blank.";
+    }
+    if (field.id === "phone") {
+        if (value !== "" && !phonePattern.test(value)) {
+            errorField.innerText = "Phone must be a valid 10-digit number.";
+        }
+    }
+    if (field.id === "email") {
+        if (value === "") {
+            errorField.innerText = "Email cannot be blank.";
+        } else if (!emailPattern.test(value)) {
+            errorField.innerText = "Please enter a valid email address.";
+        }
+    }
+    if (field.id === "password") {
+        if (value === "") errorField.innerText = "Password cannot be blank.";
+    }
+}
+
+// Attach real-time validation
+["name", "phone", "email", "password"].forEach(id => {
+    document.getElementById(id).addEventListener("keyup", function() {
+        validateField(this);
+    });
+});
+
+// Final check before submit
+document.getElementById("signupForm").addEventListener("submit", function(e) {
+    let isValid = true;
+    ["name", "phone", "email", "password"].forEach(id => {
+        let field = document.getElementById(id);
+        validateField(field);
+        if (document.getElementById(id + "Error").innerText !== "") {
+            isValid = false;
+        }
+    });
+    if (!isValid) e.preventDefault();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+<div class="container-fluid mt-3">
+  <!-- Breadcrumb -->
+  <nav class="mb-2 small text-muted">
+    Home / Clothing / <strong>{{ heading }}</strong>
+  </nav>
+
+  <!-- Heading + item count -->
+  <h5 class="fw-bold">
+   {{ heading }} 
+    <span class="fw-normal text-muted"> - {{ products.count }} items</span>
+  </h5>
+
+  <div class="row mt-3">
+    <!-- Sidebar Filters -->
+    <aside class="col-lg-3 col-md-4 col-12 mb-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold">FILTERS</h6>
+        <a href="?clear=1" class="small fw-bold" style="color:#1babeb">CLEAR ALL</a>
+      </div>
+      <hr>
+
+      <!-- Gender -->
+      <!-- <h6 class="fw-bold">Gender</h6> -->
+       {% for cat in categories %}
+      <div class="form-check">
+        <input class="form-check-input filter-input" type="radio" name="category" value="{{ cat.slug }}" id="cat{{ cat.id }}">
+        <label class="form-check-label" for="cat{{ cat.id }}">{{ cat.name }}</label>
+      </div>
+      {% endfor %}
+      <hr>
+
+      <!-- Categories -->
+      <h6 class="fw-bold">CATEGORIES</h6>
+      {% for cat in other_categories %}
+      <div class="form-check">
+        <input class="form-check-input filter-input" type="checkbox" name="other_category" value="{{ cat.slug }}" id="other_cat{{ cat.id }}">
+        <label class="form-check-label" for="other_cat{{ cat.id }}">{{ cat.name }}</label>
+      </div>
+      {% endfor %}
+      <hr>
+
+      <!-- Price -->
+     <h6 class="fw-bold mb-3">PRICE</h6>
+<div class="range-container">
+  <div class="slider-track"></div>
+  <input type="range" min="0" max="10000" value="0" step="100" id="minPrice" class="filter-input" oninput="updatePrice()">
+  <input type="range" min="0" max="10000" value="10000" step="100" id="maxPrice" class="filter-input" oninput="updatePrice()">
+</div>
+
+<p class="small mt-4">
+  ₹<span id="priceMin">0</span> - ₹<span id="priceMax">10,000+</span>
+</p>
+
+    </aside>
+
+    <!-- Product Grid -->
+    <main class="col-lg-9 col-md-8 col-12">
+      <!-- Sort -->
+      <div class="d-flex justify-content-end mb-3">
+        <select class="form-select form-select-sm w-auto filter-input" name="sort">
+          <option value="recommended">Recommended</option>
+          <option value="low-high">Price: Low to High</option>
+          <option value="high-low">Price: High to Low</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+<div id="product-grid" class="row g-3">
+  {% for p in products %}
+  <div class="col-lg-3 col-md-3">
+      <a href="{{ p.get_absolute_url }}" style="text-decoration: none;color: inherit;">
+<div class="product-card ">
+
+  <div class="product-img banner-item image-zoom-effect">
+   {% if p.image %}
+      <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+      {% endif %}
+    <div class="product-rating">
+      <span class="rating">4.5</span>
+      <span class="star">★</span>
+      <span class="count">3.2k</span>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <h5 class="brand">{{p.brand}}</h5>
+    <p class="name">{{p.name}}</p>
+
+    <div class="price-block">
+      <span class="price">Rs. {{p.base_price}}</span>
+      <!-- <span class="mrp">Rs. 1399</span>
+      <span class="discount">(70% OFF)</span> -->
+    </div>
+  </div>
+</div>
+</a>
+
+</div>
+{% endfor %}
+</div>
+    </main>
+  </div>
+</div>
+
+<!-- JS for Filters -->
+   <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/plugins.js"></script>
+  <script src="/static/js/SmoothScroll.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="/static/js/script.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const minSlider = document.getElementById("minPrice");
+  const maxSlider = document.getElementById("maxPrice");
+  const minLabel = document.getElementById("priceMin");
+  const maxLabel = document.getElementById("priceMax");
+  const params = new URLSearchParams(window.location.search);
+
+  // Restore checked/selected state from params
+  document.querySelectorAll(".filter-input").forEach(el => {
+    let paramValue = params.getAll(el.name);
+
+    if (el.type === "checkbox" || el.type === "radio") {
+      if (paramValue.includes(el.value)) {
+        el.checked = true;
+      }
+    } else if (el.tagName === "SELECT") {
+      if (paramValue.length) {
+        el.value = paramValue[0];
+      }
+    }
+  });
+
+  // Restore price values
+  if (params.has("min_price")) {
+    minSlider.value = params.get("min_price");
+  }
+  if (params.has("max_price")) {
+    maxSlider.value = params.get("max_price");
+  }
+
+  function updatePriceLabels() {
+    let minVal = parseInt(minSlider.value);
+    let maxVal = parseInt(maxSlider.value);
+    if (minVal > maxVal) { 
+      [minVal, maxVal] = [maxVal, minVal]; 
+    }
+    minLabel.textContent = minVal;
+    maxLabel.textContent = maxVal >= 10000 ? "10,000+" : maxVal;
+  }
+
+  minSlider.addEventListener("input", updatePriceLabels);
+  maxSlider.addEventListener("input", updatePriceLabels);
+  updatePriceLabels();
+
+  // Auto-submit filters
+  document.querySelectorAll(".filter-input").forEach(el => {
+    el.addEventListener("change", function () {
+      let params = new URLSearchParams();
+
+      // Handle radios → only one value per name
+      document.querySelectorAll(".filter-input[type=radio]:checked").forEach(radio => {
+        params.set(radio.name, radio.value);
+      });
+
+      // Handle checkboxes → allow multiple values
+      document.querySelectorAll(".filter-input[type=checkbox]:checked").forEach(chk => {
+        params.append(chk.name, chk.value);
+      });
+
+      // Handle dropdowns (sort etc.)
+      document.querySelectorAll("select.filter-input").forEach(select => {
+        params.set(select.name, select.value);
+      });
+
+      // Price
+      params.set("min_price", minSlider.value);
+      params.set("max_price", maxSlider.value);
+
+      window.location.search = params.toString();
+    });
+  });
+});
+</script>
+
+
+
+{% endblock %}
