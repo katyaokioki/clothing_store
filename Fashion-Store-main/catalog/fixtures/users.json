@@ -1,0 +1,15 @@
+[
+    {
+      "model": "accounts.user",
+      "pk": 1,
+      "fields": {
+        "email": "demo@demo.com",
+        "is_staff": true,
+        "is_superuser": true,
+        "is_active": true,
+        "password": "demo"
+      }
+    }
+  ]
+  
+  

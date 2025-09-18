@@ -1,0 +1,14 @@
+[
+    {
+      "model": "catalog.productcollection",
+      "pk": 1,
+      "fields": {
+        "product": 1,
+        "collection": 1,
+        "order": 1,
+        "featured_until": null,
+        "added_at": "2025-01-01T00:00:00Z"
+      }
+    }
+  ]
+  

@@ -1,0 +1,14 @@
+[
+    {
+      "model": "catalog.collection",
+      "pk": 1,
+      "fields": { "name": "BESTSELLERS", "slug": "bestsellers" }
+    },
+    {
+      "model": "catalog.collection",
+      "pk": 2,
+      "fields": { "name": "SPRING 2025", "slug": "spring-2025" }
+    }
+  ]
+
+  

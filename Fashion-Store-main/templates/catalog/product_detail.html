@@ -125,6 +125,41 @@
   {% empty %}
     <p>No reviews yet.</p>
   {% endfor %}
+  <!-- Create Review Form -->
+  {% if user.is_authenticated %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <h6 class="mb-3">Write a review</h6>
+      <form method="post" action="{% url 'create_review' product.id %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="id_rating" class="form-label">Rating</label>
+          <select name="rating" id="id_rating" class="form-select" required>
+            <option value="" selected disabled>Choose rating</option>
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★☆ (4)</option>
+            <option value="3">★★★☆☆ (3)</option>
+            <option value="2">★★☆☆☆ (2)</option>
+            <option value="1">★☆☆☆☆ (1)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_comment" class="form-label">Comment</label>
+          <textarea name="comment" id="id_comment" class="form-control" rows="3" maxlength="2000" placeholder="Share your experience..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="id_images" class="form-label">Images (optional)</label>
+          <input type="file" id="id_images" name="images" class="form-control" accept="image/*" multiple>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit review</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-info mt-3">Please sign in to write a review.</div>
+  {% endif %}
+
+
 </div>
 </div>
 

@@ -3,7 +3,10 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Count, Sum
-from .models import Category, Product, ProductVariant, Review, OtherCategory, ReviewImage
+from .models import Category, Product, ProductVariant, Review, OtherCategory, ReviewImage, Collection, ProductCollection
+import io
+from reportlab.pdfgen import canvas
+from django.http import FileResponse
 
 class ProductVariantInline(admin.TabularInline):
     """Inline для вариантов товара"""
@@ -17,6 +20,15 @@ class ReviewImageInline(admin.TabularInline):
     model = ReviewImage
     extra = 1
     fields = ('image', 'alt_text')
+
+
+class ProductCollectionInline(admin.TabularInline):
+    model = ProductCollection
+    extra = 0
+    raw_id_fields = ('collection',)
+    fields = ('collection', 'order', 'featured_until', 'added_at')
+    readonly_fields = ('added_at',)
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -126,7 +138,7 @@ class ProductAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     
     # Inline для вариантов товара
-    inlines = [ProductVariantInline]
+    inlines = [ProductVariantInline, ProductCollectionInline]
     
     # Поля для редактирования
     fieldsets = (
@@ -208,14 +220,33 @@ class ProductAdmin(admin.ModelAdmin):
     def get_rating_display(self, obj):
         """Возвращает рейтинг товара"""
         rating = obj.get_average_rating()
-        reviews_count = obj.get_reviews_count()
+        reviews_count = str(obj.get_reviews_count())
         if rating > 0:
-            stars = "★" * int(rating) + "☆" * (5 - int(rating))
+            rating = f"{int(rating)}"
+            full_stars = max(0, min(5, int(rating)))  # целая часть, обрезаем до 0..5
+            stars = "★" * full_stars + "☆" * (5 - int(rating))
             return format_html(
-                '{} ({:.1f})<br><small>{} отзывов</small>',
+                '{} ({})<br><small>{} отзывов</small>',
                 stars, rating, reviews_count
             )
         return 'Нет отзывов'
+    @admin.action(description='Скачать PDF по выбранным товарам')
+    def export_products_pdf(self, request, queryset):
+        buf = io.BytesIO()
+        p = canvas.Canvas(buf)
+        y = 800
+        for obj in queryset:
+            line = f'{obj.name} — цена: {obj.get_current_price()}'
+            p.drawString(40, y, line)
+            y -= 20
+            if y < 60:
+                p.showPage()
+                y = 800
+        p.showPage()
+        p.save()
+        buf.seek(0)
+        return FileResponse(buf, as_attachment=True, filename='products.pdf')
+    actions = ['export_products_pdf']
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
@@ -365,3 +396,5 @@ class ReviewImageAdmin(admin.ModelAdmin):
                 obj.image.url
             )
         return 'Нет изображения'
+
+

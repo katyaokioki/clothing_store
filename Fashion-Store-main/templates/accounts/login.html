@@ -7,4 +7,7 @@
   <button class="btn btn-primary">Login</button>
   <a class="btn btn-link" href="/accounts/password-reset/">Forgot password?</a>
 </form>
+{% load socialaccount %}
+<a href="{% provider_login_url 'google' %}">Войти через Google</a>
+{% providers_media_js %}
 {% endblock %}

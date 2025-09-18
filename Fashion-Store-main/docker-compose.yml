@@ -1,0 +1,49 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    command: bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    env_file: .env
+    depends_on:
+      - redis
+      - mailhog
+    ports:
+      - "8000:8000"
+
+  redis:
+    image: redis:alpine
+
+  celery:
+    build: .
+    command: python -m celery -A fashion_store worker -l info
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - redis
+
+  celery-beat:
+    build: .
+    command: python -m celery -A fashion_store beat -l info
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - redis
+
+  flower:
+    image: mher/flower:0.9.7
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI

@@ -1,0 +1,51 @@
+[
+    {
+      "model": "catalog.productvariant",
+      "pk": 1,
+      "fields": {
+        "product": 1,
+        "size": "M",
+        "color": "White",
+        "price": "1290.00",
+        "stock": 25,
+        "image": null,
+        "sku": "TSHIRT-BASIC-M-WHITE",
+        "is_active": true,
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "catalog.productvariant",
+      "pk": 2,
+      "fields": {
+        "product": 1,
+        "size": "L",
+        "color": "Black",
+        "price": "1290.00",
+        "stock": 8,
+        "image": null,
+        "sku": "TSHIRT-BASIC-L-BLACK",
+        "is_active": true,
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "catalog.productvariant",
+      "pk": 3,
+      "fields": {
+        "product": 2,
+        "size": "42",
+        "color": "Blue",
+        "price": "7990.00",
+        "stock": 12,
+        "image": null,
+        "sku": "RUNPRO-42-BLUE",
+        "is_active": true,
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z"
+      }
+    }
+  ]
+  

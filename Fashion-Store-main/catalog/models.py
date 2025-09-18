@@ -100,6 +100,28 @@ class OtherCategory(models.Model):
     def __str__(self):
         return self.name
 
+        
+class Collection(models.Model):
+    name = models.CharField(max_length=120)
+    slug = models.SlugField(unique=True)
+    def __str__(self):
+        return self.name
+
+
+class ProductCollection(models.Model):
+    product = models.ForeignKey('catalog.Product', on_delete=models.CASCADE, related_name='product_collections')
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='collection_products')
+    order = models.PositiveIntegerField(default=0, help_text="Порядок внутри подборки")
+    featured_until = models.DateTimeField(blank=True, null=True, help_text="Дата, до которой товар выделен")
+    added_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('product', 'collection')
+        ordering = ['collection', 'order']
+
+    def __str__(self):
+        return f'{self.collection.name} — {self.product.name} (#{self.order})'
+
+
 class Product(models.Model):
     """Модель товара"""
     
@@ -193,6 +215,13 @@ class Product(models.Model):
         verbose_name=_("Дата обновления"),
         auto_now=True
     )
+
+    collections = models.ManyToManyField(
+        Collection,
+        through='ProductCollection',
+        related_name='products',
+        blank=True,
+        )
 
     class Meta:
         verbose_name = _("Товар")
@@ -430,3 +459,6 @@ class ReviewImage(models.Model):
         if self.review:
             return f"Изображение к отзыву {self.review.id}"
         return f"Изображение {self.id}"
+
+
+
