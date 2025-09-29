@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect
 from orders.models import OrderItem
-
+from django.http import HttpResponseForbidden
 
 from django.views.decorators.cache import cache_page
 from django.http import JsonResponse
@@ -218,3 +218,15 @@ def catalog_list(request):
         "results": items,
     }
     return JsonResponse(data, json_dumps_params={"ensure_ascii": False})
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    product = review.product  # Получаем связанный продукт из отзыва
+    if request.user.role != 'admin':
+        return HttpResponseForbidden("Нет прав удалять отзывы")
+    if request.method == "POST":
+        review.delete()
+        return redirect('product_detail', pk=product.pk)
+    return redirect('product_detail', pk=product.pk)
+

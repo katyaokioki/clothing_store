@@ -45,7 +45,12 @@ class User(AbstractUser):
         blank=True,  # Необязательное поле - пользователь может не указать телефон
         help_text=_("Номер телефона для связи")
     )
-
+    ROLE_CHOICES = (
+        ('customer', 'Customer'),
+        ('admin', 'Admin'),
+    )
+    role = models.CharField('Роль', max_length=20, choices=ROLE_CHOICES, default='customer')
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     

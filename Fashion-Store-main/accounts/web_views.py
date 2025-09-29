@@ -20,7 +20,7 @@ def signup_view(request):
         else:
             User.objects.create_user(email=email, password=password, name=name, phone=phone)
             messages.success(request, "Account created. Please log in.")
-            return redirect('/profile/login/')
+            return redirect('/accounts/login/')
     return render(request, 'accounts/signup.html')
 
 def login_view(request):

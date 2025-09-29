@@ -98,8 +98,8 @@
     
   </div>
 
-  <!-- Reviews Section -->
- <div class="mt-4">
+<!-- Reviews Section -->
+<div class="mt-4">
   <h5>Reviews</h5>
   {% for r in reviews %}
     <div class="review-box p-3 mb-4 border rounded shadow-sm">
@@ -121,11 +121,18 @@
         </div>
       {% endif %}
 
+      <!-- Кнопка удаления только для админа -->
+      {% if user.is_authenticated and user.role == 'admin' %}
+      <form method="post" action="{% url 'delete_review' r.id %}" style="margin-top:10px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+      </form>
+      {% endif %}
+
     </div>
   {% empty %}
     <p>No reviews yet.</p>
-  {% endfor %}
-  <!-- Create Review Form -->
+  {% endfor %}  <!-- Create Review Form -->
   {% if user.is_authenticated %}
   <div class="card mt-4">
     <div class="card-body">

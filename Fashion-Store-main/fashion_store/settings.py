@@ -239,31 +239,31 @@ from pathlib import Path
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "plain": {
-            "format": "%(asctime)s %(levelname)s %(name)s %(message)s"
-        },
-    },
-    "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "plain"},
-        "visits_file": {
-            "class": "logging.FileHandler",
-            "filename": str(LOG_DIR / "visits.log"),
-            "encoding": "utf-8",
-            "formatter": "plain",
-        },
-    },
-    "loggers": {
-        "visits": {
-            "handlers": ["console", "visits_file"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "plain": {
+#             "format": "%(asctime)s %(levelname)s %(name)s %(message)s"
+#         },
+#     },
+#     "handlers": {
+#         "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+#         "visits_file": {
+#             "class": "logging.FileHandler",
+#             "filename": str(LOG_DIR / "visits.log"),
+#             "encoding": "utf-8",
+#             "formatter": "plain",
+#         },
+#     },
+#     "loggers": {
+#         "visits": {
+#             "handlers": ["console", "visits_file"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#     },
+# }
 
 
 

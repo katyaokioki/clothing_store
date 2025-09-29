@@ -5,6 +5,9 @@ from catalog.models import Product, ProductVariant
 from .models import Cart, CartItem
 from orders.models import Coupon
 from decimal import Decimal
+from django.db.models import Sum
+
+MAX_ITEMS_IN_CART = 2
 
 def _get_cart(user):
     cart, _ = Cart.objects.get_or_create(user=user)
@@ -56,6 +59,16 @@ def add_to_cart(request, product_id):
             return redirect(f'/product/{product_id}/')
         
         cart = _get_cart(request.user)
+        
+        # Считаем текущее общее количество товаров в корзине
+        current_total = CartItem.objects.filter(cart=cart).aggregate(
+            total_qty=Sum('quantity')
+        )['total_qty'] or 0
+        
+        if current_total + qty > MAX_ITEMS_IN_CART:
+            messages.error(request, f"Вы не можете добавить больше {MAX_ITEMS_IN_CART} товаров в корзину")
+            return redirect(f'/product/{product_id}/')
+        
         item, created = CartItem.objects.get_or_create(cart=cart, variant=variant)
         if not created:
             item.quantity += qty

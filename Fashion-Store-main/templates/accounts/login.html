@@ -8,6 +8,8 @@
   <a class="btn btn-link" href="/accounts/password-reset/">Forgot password?</a>
 </form>
 {% load socialaccount %}
+{% if not debug %}
 <a href="{% provider_login_url 'google' %}">Войти через Google</a>
+{% endif %}
 {% providers_media_js %}
 {% endblock %}
